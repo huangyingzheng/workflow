@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/learning');
+mongoose.connect('mongodb://localhost:27017/Slp_work-flow');
 
 const db =  mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
