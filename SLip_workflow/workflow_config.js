@@ -9,4 +9,4 @@ const configSchema = new Schema({
 })
 
 const Config = mongoose.model('Config',configSchema);
-mondule.exports = Config;
+module.exports = Config;

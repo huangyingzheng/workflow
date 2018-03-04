@@ -2,16 +2,19 @@ const db = require('./../db.js');
 const mongoose = require('mongoose');
 const User = require('./user.js');
 const Habilitation = require('./habilitation.js');
-const modules = require('./my_module')
+const alert = require('./my_module')
 const modules1= require('./my_module1')
 
-const p = new modules(1,2);
-const o = new modules(3,4)
-const p1 = modules.distance(p,o);
-console.log(p1);
+const a = new alert(new Date(), 'here','me');
+a.beExecute();
 
-const result = modules1.fct(10,11);
-console.log(result);
+// const p = new modules(1,2);
+// const o = new modules(3,4)
+// const p1 = modules.distance(p,o);
+// console.log(p1);
+//
+// const result = modules1.fct(10,11);
+// console.log(result);
 // const A = new User({_id : new mongoose.Types.ObjectId(), name : 'Mr.A'})
 // A.save(function (err,obj) {
 //     if(err){

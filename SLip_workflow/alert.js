@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const alertSchema = new Schema({
     _id : Schema.Types.ObjectId,
-    step : String,
+    step : String,// pending'ok; nok;
     order : Number,
     date : Date
 })
