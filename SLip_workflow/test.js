@@ -1,61 +1,43 @@
-const db = require('./../db.js');
-const mongoose = require('mongoose');
-const User = require('./user.js');
-const Habilitation = require('./habilitation.js');
-const alert = require('./my_module')
-const modules1= require('./my_module1')
+const db = require("./../db.js");
+const mongoose = require("mongoose");
+const User = require("./user.js");
+const Habilitation = require("./habilitation.js");
+const modules1 = require("./my_module1");
+const Config = require("./workflow_config");
 
-const a = new alert(new Date(), 'here','me');
-a.beExecute();
+// modules1.saveAlert(new Date());
+modules1.beExecute('5a9eba2b2efcb45e07c84f57','5a993179661aa026d7ee44f5','agree');
+// const id = '5a993179661aa026d7ee44f5'
+// const start = async function(id) {
+//     const result = await Habilitation.findOne({ users_id: id }).exec();
+//     console.log(result);
+//     const result1 = await Config.findOne({ hab_id: result._id }).exec();
+//     const f = function(){ if(result1.order === 1){
+//         return true
+//     }}
+//     console.log(f());
+//     console.log(result1);
+// }
+// start('5a993179661aa026d7ee44f5');
+// result.then(hab =>{Config.findOne({ hab_id: hab._id }).exec();}, err => {console.log(err)})
 
-// const p = new modules(1,2);
-// const o = new modules(3,4)
-// const p1 = modules.distance(p,o);
-// console.log(p1);
-//
-// const result = modules1.fct(10,11);
-// console.log(result);
-// const A = new User({_id : new mongoose.Types.ObjectId(), name : 'Mr.A'})
-// A.save(function (err,obj) {
-//     if(err){
-//         return console.error(err)
-//     }
-//     console.log('inserted successful'+ obj);
-//
-// })
-//
-// const B = new User({_id : new mongoose.Types.ObjectId(), name : 'Mr.B'})
-// B.save(function (err,obj) {
-//     if(err){
-//         return console.error(err)
-//     }
-//     console.log('inserted successful'+ obj);
-//
-// })
-//
-// const C = new User({_id : new mongoose.Types.ObjectId(), name : 'Mr.C'})
-// C.save(function (err,obj) {
-//     if(err){
-//         return console.error(err)
-//     }
-//     console.log('inserted successful'+ obj);
-//
-// })
-//
-// const post = new Habilitation({_id : new mongoose.Types.ObjectId(), name : 'emploie'},function(err){
-//     if(err){
-//         console.error(err);
+
+// Config.create({_id: new mongoose.Types.ObjectId, hab_id:undefined,profile:'m',order:2});
+
+// Habilitation.findOne({_id:'5a993179661aa026d7ee44f8'},function(err,result){
+//     if (err){
+//         console.log(err);
 //     }
 //     else{
-//         console.log('successful habilitation');
-//     }
-// })
-//
-// post.addUser([A,B,C],function(err){
-//     if(err){
-//         console.error(err);
-//     }
-//     else{
-//         console.log('successful insert')
+//         Config.findOne({_id:'5a9e790979a81c28318c86ea'},function(err,config){
+//             if(err){
+//                 console.log(err)
+//             }
+//             else{
+//                 config.addHab1(result,function(err){
+//                     console.log(err);
+//                 });
+//             }
+//         })
 //     }
 // })

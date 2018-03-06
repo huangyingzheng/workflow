@@ -3,10 +3,16 @@ const Schema = mongoose.Schema;
 
 const configSchema = new Schema({
     _id : Schema.Types.ObjectId,
-    hab_id : {type:Schema.Types.ObjectId, ref:'Habilitation'},
+    hab_id : {type: Schema.Types.ObjectId, ref: 'Habilitation'},
     profile : String,
     order : Number
 })
 
-const Config = mongoose.model('Config',configSchema);
+configSchema.methods.addHab = function(obj,cb){
+    this.hab_id = mongoose.Types.ObjectId(obj._id);
+    console.log(this);
+    this.save(cb);
+}
+
+Config = mongoose.model('Config',configSchema);
 module.exports = Config;
