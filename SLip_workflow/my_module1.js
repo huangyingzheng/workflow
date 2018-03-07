@@ -42,33 +42,65 @@ async function authenticate(user, order) {
 
 function beExecute(id, user, judgement) {
     const start = async function() {
+        // const String;
         try {
             const alert = await findAlert(id);
-            console.log(alert.order);
-            let order = alert.order;
+            const order = alert.order+1;
             const boolean = await authenticate(user, order);
-            console.log(typeof boolean);
 
             if (alert.id) {
                 if (boolean === true && judgement === "agree") {
+                    if(alert.order < 2){
+                        Alert_model.update(
+                            { _id: alert.id },
+                            {
+                                $set: {
+                                    step: "pending",
+                                    order: alert.order+1
+                                }
+                            }
+                        ).exec();
+                        // return 'true';
+                    }
+                    else if(alert.order === 2){
+                        Alert_model.update(
+                            { _id: alert.id },
+                            {
+                                $set: {
+                                    step: "ok",
+                                    order: 0
+                                }
+                            }
+                        ).exec();
+                    }
+                }
+                else if(boolean === true && judgement === 'disagree'){
                     Alert_model.update(
                         { _id: alert.id },
                         {
                             $set: {
-                                step: "pending",
-                                order: alert.order + 1
+                                step: "reject",
+                                order: 0
                             }
                         }
                     ).exec();
                 }
-            } else {
-                new Error("id invalid");
+                else if(boolean === false){
+                    const err = new Error('user id invalid');
+                    throw err;
+                }
             }
-            console.log("successful");
+            else {
+                const err = new Error("alert id invalid");
+                throw err;
+            }
+            // String = 'successful'
+            // return String;
         } catch (err) {
             console.log(err);
         }
     };
-    console.log(start());
+    start();
 }
+
 module.exports = { saveAlert, beExecute };

@@ -6,38 +6,49 @@ const modules1 = require("./my_module1");
 const Config = require("./workflow_config");
 
 // modules1.saveAlert(new Date());
-modules1.beExecute('5a9eba2b2efcb45e07c84f57','5a993179661aa026d7ee44f5','agree');
-// const id = '5a993179661aa026d7ee44f5'
-// const start = async function(id) {
-//     const result = await Habilitation.findOne({ users_id: id }).exec();
-//     console.log(result);
-//     const result1 = await Config.findOne({ hab_id: result._id }).exec();
-//     const f = function(){ if(result1.order === 1){
-//         return true
-//     }}
-//     console.log(f());
-//     console.log(result1);
-// }
-// start('5a993179661aa026d7ee44f5');
-// result.then(hab =>{Config.findOne({ hab_id: hab._id }).exec();}, err => {console.log(err)})
+const s = modules1.beExecute('5a9ffd51321b5643631e1168','5a9d0f75568cc91a3e3d3359','agree');
+console.log(s);
+// console.log(typeof s);
+// s.then(val => {console.log(val)})
+    // .then(val => {console.log(val)})
+// console.log(string);
+// _id:'5a9fb4c357161c1f46ea08eb' order 2
+//'5a993179661aa026d7ee44f5' order 1
+//'5a9d0f75568cc91a3e3d3359' order 3
 
 
-// Config.create({_id: new mongoose.Types.ObjectId, hab_id:undefined,profile:'m',order:2});
+// Config.create({_id: new mongoose.Types.ObjectId, hab_id:undefined,profile:'order3',order:3});
 
-// Habilitation.findOne({_id:'5a993179661aa026d7ee44f8'},function(err,result){
+// Habilitation.findOne({_id:'5a9fbd662150f62495760fb9'},function(err,result){
 //     if (err){
 //         console.log(err);
 //     }
 //     else{
-//         Config.findOne({_id:'5a9e790979a81c28318c86ea'},function(err,config){
+//         Config.findOne({_id:'5a9fbdf5aae96b24ea86a9f7'},function(err,config){
 //             if(err){
 //                 console.log(err)
 //             }
 //             else{
-//                 config.addHab1(result,function(err){
+//                 config.addHab(result,function(err){
 //                     console.log(err);
 //                 });
 //             }
+//         })
+//     }
+// })
+
+
+// User.create({_id: new mongoose.Types.ObjectId(),name: 'D'});
+//
+// Habilitation.create({_id: new mongoose.Types.ObjectId(),name: 'directeur'});
+//
+// Habilitation.findOne({_id:'5a9fbd662150f62495760fb9'},function(err,hab){
+//     if(err){
+//         console.log(err)
+//     }
+//     else{
+//         User.findOne({_id:'5a9d0f75568cc91a3e3d3359'},function(err,user){
+//             hab.addUser(user,function(err){if(!err){console.log('s')}})
 //         })
 //     }
 // })
