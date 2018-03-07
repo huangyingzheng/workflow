@@ -48,22 +48,34 @@ app.get("/:collection", function(req, res) {
     }
 });
 
-app.put('/user',urlencodedParser,function(req,res) {
+app.put("/user", urlencodedParser, function(req, res) {
     const name = req.body.name;
-    User.create({_id:new mongoose.Types.ObjectId(),name:name},function(err){
-        if(!err){
-            res.send('create a user successful');
+    User.create({ _id: new mongoose.Types.ObjectId(), name: name }, function(
+        err
+    ) {
+        if (!err) {
+            res.send("create a user successful");
         }
-    })
-})
+    });
+});
 
-app.post('/alert_traiter',urlencodedParser,function(req,res){
+app.post("/alert_traiter", urlencodedParser, function(req, res) {
     const alert_id = req.body.alert_id;
     const user_id = req.body.user_id;
     const judgement = req.body.judgement;
 
-    console.log(typeof  modules1.beExecute(alert_id,user_id,judgement));
-})
+    const p = modules1.beExecute(alert_id, user_id, judgement);
+    p.then(
+        () => {
+            res.send("update successful");
+        },
+        err => {
+            const error = err.toString();
+            res.status(500).send(error);
+            console.log(err);
+        }
+    );
+});
 // app.put("/orgAxis", urlencodedParser, function(req, res) {
 //     const name = req.body.name;
 //     OrgAxis.create({ _id: new mongoose.Types.ObjectId(), name: name }, function(

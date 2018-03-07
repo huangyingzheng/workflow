@@ -7,7 +7,9 @@ const Config = require("./workflow_config");
 
 // modules1.saveAlert(new Date());
 const s = modules1.beExecute('5a9ffd51321b5643631e1168','5a9d0f75568cc91a3e3d3359','agree');
-console.log(s);
+s.then(() => {console.log('successful')},(err) => {console.log(err)});
+// s.catch(err => {console.log(err)})
+// s.then(val => {console.log(val)})
 // console.log(typeof s);
 // s.then(val => {console.log(val)})
     // .then(val => {console.log(val)})

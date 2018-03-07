@@ -25,7 +25,7 @@ function findAlert(id) {
 async function authenticate(user, order) {
     try {
         const result = await Habilitation.findOne({ users_id: user }).exec();
-        console.log(result);
+        // console.log(result);
         const result1 = await Config.findOne({ hab_id: result._id }).exec();
         const f = function() {
             if (result1.order === order) {
@@ -36,12 +36,12 @@ async function authenticate(user, order) {
         };
         return f();
     } catch (err) {
-        console.log("err");
+        console.log(err);
     }
 }
 
-function beExecute(id, user, judgement) {
-    const start = async function() {
+async function beExecute(id, user, judgement) {
+    // const start = async function() {
         // const String;
         try {
             const alert = await findAlert(id);
@@ -97,10 +97,10 @@ function beExecute(id, user, judgement) {
             // String = 'successful'
             // return String;
         } catch (err) {
-            console.log(err);
+            throw err;
         }
-    };
-    start();
+    // };
+    // start();
 }
 
 module.exports = { saveAlert, beExecute };
