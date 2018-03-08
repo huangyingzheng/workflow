@@ -1,4 +1,5 @@
 const express = require("express");
+const _ = require('lodash');
 const app = express();
 const db = require("./../db.js");
 const User = require("./user.js");
@@ -59,6 +60,17 @@ app.put("/user", urlencodedParser, function(req, res) {
     });
 });
 
+app.put("/habilitation", urlencodedParser, function(req, res) {
+    const name = req.body.name;
+    User.create({ _id: new mongoose.Types.ObjectId(), name: name }, function(
+        err
+    ) {
+        if (!err) {
+            res.send("create a habilitation successful");
+        }
+    });
+});
+
 app.post("/alert_traiter", urlencodedParser, function(req, res) {
     const alert_id = req.body.alert_id;
     const user_id = req.body.user_id;
@@ -76,6 +88,25 @@ app.post("/alert_traiter", urlencodedParser, function(req, res) {
         }
     );
 });
+
+app.post('/habilitation/:hab_id/:user_id',function(req,res){
+    const hab_id = req.params.hab_id;
+    const arrStr = req.params.user_id;
+    const array = arrStr.split(',');
+    if(_.isArray(array)){
+        const p = modules1.addUser(array,hab_id);
+        p.then(
+            (val) => {
+            res.send('update successful');
+    },
+        err => {
+            const error = err.toString();
+            res.status(500).send(error);
+            console.log(err);
+        }
+    );
+    }
+})
 // app.put("/orgAxis", urlencodedParser, function(req, res) {
 //     const name = req.body.name;
 //     OrgAxis.create({ _id: new mongoose.Types.ObjectId(), name: name }, function(

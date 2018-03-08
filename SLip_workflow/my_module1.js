@@ -41,66 +41,71 @@ async function authenticate(user, order) {
 }
 
 async function beExecute(id, user, judgement) {
-    // const start = async function() {
-        // const String;
-        try {
-            const alert = await findAlert(id);
-            const order = alert.order+1;
-            const boolean = await authenticate(user, order);
+    try {
+        const alert = await findAlert(id);
+        const order = alert.order + 1;
+        const boolean = await authenticate(user, order);
 
-            if (alert.id) {
-                if (boolean === true && judgement === "agree") {
-                    if(alert.order < 2){
-                        Alert_model.update(
-                            { _id: alert.id },
-                            {
-                                $set: {
-                                    step: "pending",
-                                    order: alert.order+1
-                                }
-                            }
-                        ).exec();
-                        // return 'true';
-                    }
-                    else if(alert.order === 2){
-                        Alert_model.update(
-                            { _id: alert.id },
-                            {
-                                $set: {
-                                    step: "ok",
-                                    order: 0
-                                }
-                            }
-                        ).exec();
-                    }
-                }
-                else if(boolean === true && judgement === 'disagree'){
+        if (alert.id) {
+            if (boolean === true && judgement === "agree") {
+                if (alert.order < 2) {
                     Alert_model.update(
                         { _id: alert.id },
                         {
                             $set: {
-                                step: "reject",
+                                step: "pending",
+                                order: alert.order + 1
+                            }
+                        }
+                    ).exec();
+                } else if (alert.order === 2) {
+                    Alert_model.update(
+                        { _id: alert.id },
+                        {
+                            $set: {
+                                step: "ok",
                                 order: 0
                             }
                         }
                     ).exec();
                 }
-                else if(boolean === false){
-                    const err = new Error('user id invalid');
-                    throw err;
-                }
-            }
-            else {
-                const err = new Error("alert id invalid");
+            } else if (boolean === true && judgement === "disagree") {
+                Alert_model.update(
+                    { _id: alert.id },
+                    {
+                        $set: {
+                            step: "reject",
+                            order: 0
+                        }
+                    }
+                ).exec();
+            } else if (boolean === false) {
+                const err = new Error("user id invalid");
                 throw err;
             }
-            // String = 'successful'
-            // return String;
-        } catch (err) {
+        } else {
+            const err = new Error("alert id invalid");
             throw err;
         }
-    // };
-    // start();
+    } catch (err) {
+        throw err;
+    }
 }
 
-module.exports = { saveAlert, beExecute };
+async function addUser(array, hab_id) {
+    try {
+        for (let i = 0; i in array; i++) {
+            const user = await User.findOne({ _id: array[i] }).exec();
+            const hab = await Habilitation.findOne({ _id: hab_id }).exec();
+            hab.addUser(user,function(err){
+                if(!err){
+                }
+            })
+
+        }
+    } catch (err) {
+        throw err;
+    }
+}
+
+module.exports = { saveAlert, beExecute, addUser };
