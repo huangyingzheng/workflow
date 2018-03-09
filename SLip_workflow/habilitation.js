@@ -5,7 +5,7 @@ const _ = require("lodash");
 const habSchema = new Schema({
     _id : Schema.Types.ObjectId,
     name : String,
-    users_id : [ {type:Schema.Types.ObjectId, ref:'User'}]
+    users_id : [{type:Schema.Types.ObjectId, ref:'User'}]
     // users : [{'$ref': String, '$id': {type: Schema.Types.ObjectId, ref: 'User'}}]
 })
 

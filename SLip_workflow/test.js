@@ -1,13 +1,14 @@
 const db = require("./../db.js");
 const mongoose = require("mongoose");
 const User = require("./user.js");
+const Alert_model = require('./alert');
 const Habilitation = require("./habilitation.js");
 const modules1 = require("./my_module1");
 const Config = require("./workflow_config");
 
 // modules1.saveAlert(new Date());
-const s = modules1.beExecute('5a9ffd51321b5643631e1168','5a9d0f75568cc91a3e3d3359','agree');
-s.then(() => {console.log('successful')},(err) => {console.log(err)});
+// const s = modules1.beExecute('5a9ffd51321b5643631e1168','5a9d0f75568cc91a3e3d3359','agree');
+// s.then(() => {console.log('successful')},(err) => {console.log(err)});
 // s.catch(err => {console.log(err)})
 // s.then(val => {console.log(val)})
 // console.log(typeof s);
@@ -19,14 +20,14 @@ s.then(() => {console.log('successful')},(err) => {console.log(err)});
 //'5a9d0f75568cc91a3e3d3359' order 3
 
 
-// Config.create({_id: new mongoose.Types.ObjectId, hab_id:undefined,profile:'order3',order:3});
+// Config.create({_id: new mongoose.Types.ObjectId, hab_id:undefined,profile:'order3',order:2,step:1});
 
-// Habilitation.findOne({_id:'5a9fbd662150f62495760fb9'},function(err,result){
+// Habilitation.findOne({_id:'5a993179661aa026d7ee44f8'},function(err,result){
 //     if (err){
 //         console.log(err);
 //     }
 //     else{
-//         Config.findOne({_id:'5a9fbdf5aae96b24ea86a9f7'},function(err,config){
+//         Config.findOne({_id:'5aa2a9542002943d3fb33f8c'},function(err,config){
 //             if(err){
 //                 console.log(err)
 //             }
@@ -54,3 +55,23 @@ s.then(() => {console.log('successful')},(err) => {console.log(err)});
 //         })
 //     }
 // })
+
+
+
+// const test = async () => {
+//     try{
+//         const result = await Alert_model.findOne({_id:"5a9fef608bc8ec3a1316b59f"})
+//             .exec();
+//         return result;
+//     }
+//     catch(err) {
+//         console.log(err);
+//     }
+// }
+// test().then(val => {
+//     console.log(val)
+// });
+
+
+// Alert_model.findOne({_id:"5a9fef608bc8ec3a1316b59f"})
+//     .then(val => {console.log(val)},err => {console.log(err)});

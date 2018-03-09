@@ -3,9 +3,9 @@ const Schema = mongoose.Schema;
 
 const alertSchema = new Schema({
     _id : Schema.Types.ObjectId,
-    step : String,// pending'ok; nok;
-    order : Number,
-    date : Date
+    step : [{type :Schema.Types.ObjectId, ref: 'Config'}],
+    current_step : Number,
+    log : Schema.Types.Mixed
 })
 
 const Alert = mongoose.model('Alert',alertSchema);
