@@ -3,8 +3,9 @@ const Schema = mongoose.Schema;
 
 const alertSchema = new Schema({
     _id : Schema.Types.ObjectId,
-    step : [{type :Schema.Types.ObjectId, ref: 'Config'}],
+    step : [],
     current_step : Number,
+    current_order : Number,
     log : Schema.Types.Mixed
 })
 
