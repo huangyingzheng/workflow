@@ -1,3 +1,5 @@
 /.idea/*
 /node_modules/*
 .app1.js
+.alert_module.test.js
+

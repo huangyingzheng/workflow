@@ -1,12 +1,15 @@
-const mongoos = require('mongoose');
+const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const statusSchema = new Schema({
-    _id : Schema.Types.ObjectId,
-    user_id : {type:Schema.Types.ObjectId, ref:'User'},
-    active : boolean,
-    alert_id : {type:Schema.Types.ObjectId, ref:'Alert'}
+status_usersSchema = new Schema({
+    _id: Schema.Types.ObjectId,
+    user_id: Schema.Types.ObjectId,
+    alert_id : Schema.Types.ObjectId,
+    active: Boolean,
+    step:Number,
+    order:Number
 })
 
-Status = mongoose.model('Status',statusSchema);
-module.exports = Status;
+Status_user = mongoose.model('Status_user',status_usersSchema);
+
+module.exports = Status_user;
