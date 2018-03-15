@@ -7,6 +7,7 @@ const assert = require("assert");
 const Habilitation = require("./habilitation");
 const User = require("./user");
 const Status_user = require("./status_user");
+const _ = require('lodash');
 
 async function asyncForEach(array, callback) {
     for (let index = 0; index < array.length; index++) {
@@ -16,19 +17,25 @@ async function asyncForEach(array, callback) {
 
 class Alert {
     constructor(date) {
-        this.date = date;
-        const alert = new Alert_model({
-            _id: new mongoose.Types.ObjectId(),
-            log: {}
-        });
-        this.alert = alert;
-        // return alert;
+        if( _.isDate(date)){
+            this.date = date;
+            const alert = new Alert_model({
+                _id: new mongoose.Types.ObjectId(),
+                log: {}
+            });
+            this.alert = alert;
+        }
+        else{
+            return;
+            // throw new Error('invalid input');
+        }
+
     }
 
     async initialise() {
         try {
             this.alert.log.create_date = this.date;
-            this.alert.current_step = 0;
+            this.alert.current_step = 1;
             this.alert.current_order = 0;
             const that = this;
             const step = await Step.find({});
@@ -43,51 +50,57 @@ class Alert {
     } //initialiser un object
 
     async initialise_view(result) {
-        const view = Status_user;
-        let i = result.current_step;
-        let j = result.current_order;
-        let config_id = undefined;
-        const current_user = result.step[i][j];
-        const controller = await Step.find({ name: "step_0" })
-            .exec()
-            .then(controller => {
+        try{
+            const view = Status_user;
+            let i = result.current_step;
+            let j = result.current_order;
+            let config_id = undefined;
+            const current_user = result.step[i][j];
+            const controller = await Step.find({ name: "step_0" })
+                .exec()
+                .then(controller => {
                 config_id = controller[0].comprises;
-                config_id.push(current_user);
-            });
-        for (let index = 0; index in config_id; index++) {
-            const config = await Config.findOne({
-                _id: config_id[index]
-            }).exec();
-            if (index === 0) {
-                view.step = 0;
-                view.order = 0;
-                view.active = false;
-            } else {
-                view.step = result.current_step;
-                view.order = result.current_order;
-                if (i === 0) {
+            config_id.push(current_user);
+        });
+            for (let index = 0; index in config_id; index++) {
+                const config = await Config.findOne({
+                    _id: config_id[index]
+                }).exec();
+                if (index === 0) {
+                    view.step = 0;
+                    view.order = 0;
                     view.active = false;
                 } else {
-                    view.active = true;
+                    view.step = result.current_step;
+                    view.order = result.current_order;
+                    if (i === 0) {
+                        view.active = false;
+                    } else {
+                        view.active = true;
+                    }
                 }
+                const habilitation = await Habilitation.findOne({
+                    _id: config.hab_id
+                }).exec();
+                const users = habilitation.users_id;
+                users.forEach(async function(user) {
+                    let view_instance = new view({
+                        _id: new mongoose.Types.ObjectId(),
+                        alert_id: result._id,
+                        step: view.step,
+                        order: view.order,
+                        user_id: user,
+                        active: view.active
+                    });
+                    await view_instance.save().then(val => {
+                        console.log(val);
+                });
+                });
             }
-            const habilitation = await Habilitation.findOne({
-                _id: config.hab_id
-            }).exec();
-            const users = habilitation.users_id;
-            users.forEach(async function(user) {
-                let view_instance = new view({
-                    _id: new mongoose.Types.ObjectId(),
-                    alert_id: result._id,
-                    step: view.step,
-                    order: view.order,
-                    user_id: user,
-                    active: view.active
-                });
-                await view_instance.save().then(val => {
-                    console.log(val);
-                });
-            });
+        }
+        catch(e){
+            console.error(e);
+            throw e;
         }
     } // initialise a status_users
 
@@ -128,34 +141,48 @@ class Alert {
 
     async nextStep(result) {
         try {
-            if (
-                result.current_order + 1 <
-                result.step[result.current_step].length
-            ) {
-                return await Alert_model.update(
-                    { _id: mongoose.Types.ObjectId(result._id) },
-                    { $set: { current_order: result.current_order + 1 } }
-                ).exec();
-            } else if (
-                result.current_order + 1 ===
-                result.step[result.current_step].length
-            ) {
-                if (result.current_step + 1 === result.step.length) {
-                    throw "ok";
-                } else {
+            if(result.step === undefined){
+                // throw new Error('no record')
+                return await new Promise(function(resolve,reject){
+                    reject('no record');
+                })
+            }
+            else if(result.step.length === 0){
+                return await new Promise(function(resolve,reject){
+                    reject('no record');
+                })
+            }
+            else{
+                if (
+                    result.current_order + 1 <
+                    result.step[result.current_step].length
+                ) {
                     return await Alert_model.update(
                         { _id: mongoose.Types.ObjectId(result._id) },
-                        {
-                            $set: {
-                                current_step: result.current_step + 1,
-                                current_order: 0
-                            }
-                        }
+                        { $set: { current_order: result.current_order + 1 } }
                     ).exec();
-                }
+                } else if (
+                    result.current_order + 1 ===
+                    result.step[result.current_step].length
+                ) {
+                    if (result.current_step + 1 === result.step.length) {
+                        throw new Error('end');
+                    } else {
+                        return await Alert_model.update(
+                            { _id: mongoose.Types.ObjectId(result._id) },
+                            {
+                                $set: {
+                                    current_step: result.current_step + 1,
+                                    current_order: 0
+                                }
+                            }
+                        ).exec();
+                    }
             }
+            }
+
         } catch (err) {
-            console.log(err);
+            return err;
         }
     } // currentStep +1 if celui qui appeler ce methodes est le derniere etap, retour ok
 
@@ -192,20 +219,21 @@ class Alert {
         }
     }
 }
+module.exports = Alert;
 
 const a = new Alert(new Date());
 const start = async function() {
     try {
         // let alert = await a.initialise();
-        let alert = await a.findAlert("5aa7b20e6366252883250adb");
-        // a.nextStep(alert);
+        let alert = await a.findAlert("5aaaad243bc23e6971d39bab");
+        let result = await a.nextStep(alert);
+        console.log(result);
         // a.initialise_view(alert);
         // const view = await a.view(alert);
         // console.log(view);
-        await a.previous(alert);
+        // await a.previous(alert);
     } catch (err) {
         console.log(err);
-        throw err;
     }
 };
 start();
@@ -217,7 +245,7 @@ start();
 // a2();
 // console.log(1);
 
-// module.exports = {Alert}
+
 
 // export class Workflow_config{
 //     constructor(name){

@@ -24,5 +24,9 @@ habSchema.methods.addUser = function(object,callback){
 
 }
 
+habSchema.methods.findONE = function(cb){
+    this.model('Habilitation').findOne({name:"directeur"},function(err,val){cb(val);})
+}
+
 Habilitation = mongoose.model('Habilitation',habSchema);
 module.exports = Habilitation;

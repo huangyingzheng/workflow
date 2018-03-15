@@ -8,6 +8,14 @@ const Config = require("./workflow_config");
 const Step = require("./step.js");
 const assert = require("assert");
 
+export async function Start(){
+    const val = await Habilitation.findOne({_id:'5aa91f2c571bd12efcdf7d62'},function(err,val){return val});
+    val.findONE(function (val) {
+        console.log(val);
+    })
+}
+Start();
+
 
 // var getNumbers = () => {
 //     return Promise.resolve([1, 2, 3])
