@@ -7,7 +7,7 @@ const assert = require("assert");
 const Habilitation = require("./habilitation");
 const User = require("./user");
 const Status_user = require("./status_user");
-const _ = require('lodash');
+const _ = require("lodash");
 
 async function asyncForEach(array, callback) {
     for (let index = 0; index < array.length; index++) {
@@ -17,19 +17,17 @@ async function asyncForEach(array, callback) {
 
 class Alert {
     constructor(date) {
-        if( _.isDate(date)){
+        if (_.isDate(date)) {
             this.date = date;
             const alert = new Alert_model({
                 _id: new mongoose.Types.ObjectId(),
                 log: {}
             });
             this.alert = alert;
-        }
-        else{
-            return;
+        } else {
+            return undefined;
             // throw new Error('invalid input');
         }
-
     }
 
     async initialise() {
@@ -45,12 +43,12 @@ class Alert {
             const save = await that.alert.save();
             return save;
         } catch (err) {
-            throw err;
+            return err;
         }
     } //initialiser un object
 
     async initialise_view(result) {
-        try{
+        try {
             const view = Status_user;
             let i = result.current_step;
             let j = result.current_order;
@@ -59,9 +57,9 @@ class Alert {
             const controller = await Step.find({ name: "step_0" })
                 .exec()
                 .then(controller => {
-                config_id = controller[0].comprises;
-            config_id.push(current_user);
-        });
+                    config_id = controller[0].comprises;
+                    config_id.push(current_user);
+                });
             for (let index = 0; index in config_id; index++) {
                 const config = await Config.findOne({
                     _id: config_id[index]
@@ -94,13 +92,12 @@ class Alert {
                     });
                     await view_instance.save().then(val => {
                         console.log(val);
-                });
+                    });
                 });
             }
-        }
-        catch(e){
+        } catch (e) {
             console.error(e);
-            throw e;
+            return e;
         }
     } // initialise a status_users
 
@@ -114,9 +111,12 @@ class Alert {
             const save = await result.save();
             return save;
         } catch (err) {
-            const error = new Error("id no found");
-            console.log(error);
-            throw error;
+            return new Promise(function(resolve,reject){
+                reject('id no found');
+            })
+            // return 'id no found';
+            // return undefined;
+            // return new Error('id no found');
         }
     } //  handle late
 
@@ -141,34 +141,50 @@ class Alert {
 
     async nextStep(result) {
         try {
-            if(result.step === undefined){
+            if (result.step === undefined) {
                 // throw new Error('no record')
-                return await new Promise(function(resolve,reject){
-                    reject('no record');
-                })
-            }
-            else if(result.step.length === 0){
-                return await new Promise(function(resolve,reject){
-                    reject('no record');
-                })
-            }
-            else{
+                return await new Promise(function(resolve, reject) {
+                    reject("record not exist");
+                });
+            } else if (result.step.length === 0) {
+                return await new Promise(function(resolve, reject) {
+                    reject("no record");
+                });
+            } else {
                 if (
                     result.current_order + 1 <
                     result.step[result.current_step].length
                 ) {
-                    return await Alert_model.update(
+                    await Alert_model.update(
                         { _id: mongoose.Types.ObjectId(result._id) },
                         { $set: { current_order: result.current_order + 1 } }
                     ).exec();
+                    return await new Promise(function(resolve, reject) {
+                        resolve(
+                            "successful:" +
+                                " current_step " +
+                                result.current_step +
+                                " current_order " +
+                            (result.current_order+1)
+                        );
+                    });
                 } else if (
                     result.current_order + 1 ===
                     result.step[result.current_step].length
                 ) {
                     if (result.current_step + 1 === result.step.length) {
-                        throw new Error('end');
+                        return await new Promise(function(resolve, reject) {
+                            resolve(
+                                "successful:" +
+                                    " current_step " +
+                                result.current_step +
+                                    " current_order " +
+                                result.current_order +
+                                    "\nhere is the end of step"
+                            );
+                        });
                     } else {
-                        return await Alert_model.update(
+                        await Alert_model.update(
                             { _id: mongoose.Types.ObjectId(result._id) },
                             {
                                 $set: {
@@ -177,10 +193,18 @@ class Alert {
                                 }
                             }
                         ).exec();
+                        return await new Promise(function(resolve, reject) {
+                            resolve(
+                                "successful:" +
+                                    " current_step " +
+                                (result.current_step+1) +
+                                    " current_order " +
+                                    0
+                            );
+                        });
                     }
+                }
             }
-            }
-
         } catch (err) {
             return err;
         }
@@ -188,34 +212,65 @@ class Alert {
 
     async previous(result) {
         try {
-            const order = result.current_order;
-            const step = result.current_step;
-            if (order > 0) {
-                return await Alert_model.update(
-                    {
-                        _id: mongoose.Types.ObjectId(result._id)
-                    },
-                    { $set: { current_order: result.current_order - 1 } }
-                ).exec();
-            } else if (order === 0) {
-                if (step <= 1) {
-                    return;
-                } else {
-                    return await Alert_model.update(
-                        { _id: result._id },
+            if (result.step === undefined) {
+                // throw new Error('no record')
+                return await new Promise(function(resolve, reject) {
+                    reject("record not exist");
+                });
+            } else if (result.step.length === 0) {
+                return await new Promise(function(resolve, reject) {
+                    reject("no record");
+                });
+            } else {
+                const order = result.current_order;
+                const step = result.current_step;
+                if (order > 0) {
+                    await Alert_model.update(
                         {
-                            $set: {
-                                current_step: result.current_step - 1,
-                                current_order:
-                                    result.step[result.current_step - 1]
-                                        .length - 1
-                            }
-                        }
+                            _id: mongoose.Types.ObjectId(result._id)
+                        },
+                        { $set: { current_order: result.current_order - 1 } }
                     ).exec();
+                    return await new Promise(function(resolve, reject) {
+                        resolve(
+                            "successful:" +
+                                " current_step " +
+                                result.current_step +
+                                " current_order " +
+                            (result.current_order-1)
+                        );
+                    });
+                } else if (order === 0) {
+                    if (step <= 1) {
+                        return await new Promise(function(resolve, reject) {
+                            reject("you have not authority to access");
+                        });
+                    } else {
+                        await Alert_model.update(
+                            { _id: result._id },
+                            {
+                                $set: {
+                                    current_step: result.current_step - 1,
+                                    current_order:
+                                        result.step[result.current_step - 1]
+                                            .length - 1
+                                }
+                            }
+                        ).exec();
+                        return await new Promise(function(resolve, reject) {
+                            resolve(
+                                "successful:" +
+                                    " current_step " +
+                                (result.current_step-1) +
+                                    " current_order " +
+                                (result.step[result.current_step - 1].length - 1)
+                            );
+                        });
+                    }
                 }
             }
         } catch (err) {
-            console.log(err);
+            return err;
         }
     }
 }
@@ -225,9 +280,13 @@ const a = new Alert(new Date());
 const start = async function() {
     try {
         // let alert = await a.initialise();
-        let alert = await a.findAlert("5aaaad243bc23e6971d39bab");
-        let result = await a.nextStep(alert);
-        console.log(result);
+        let alert = await a.findAlert("5aabbeaaafe36526fd4f6be");
+        // let result = await a.nextStep(alert);
+        // result = await a.nextStep(result);
+        // console.log(alert);
+        // console.log(typeof alert);
+        // assert.ok(alert instanceof Promise);
+        // console.log(alert);
         // a.initialise_view(alert);
         // const view = await a.view(alert);
         // console.log(view);
@@ -244,8 +303,6 @@ start();
 // }
 // a2();
 // console.log(1);
-
-
 
 // export class Workflow_config{
 //     constructor(name){

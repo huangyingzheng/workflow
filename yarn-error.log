@@ -1,17 +1,17 @@
 Arguments: 
-  C:\Program Files\nodejs\node.exe C:\Program Files (x86)\Yarn\bin\yarn.js prettier
+  /usr/local/bin/node /usr/share/yarn/bin/yarn.js test alert_module.test.js
 
 PATH: 
-  C:\oraclexe\app\oracle\product\11.2.0\server\bin;C:\Program Files (x86)\Intel\iCLS Client\;C:\Program Files\Intel\iCLS Client\;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Program Files (x86)\Common Files\lenovo\easyplussdk\bin;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\IPT;C:\Program Files\Intel\Intel(R) Management Engine Components\IPT;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\Program Files\TortoiseGit\bin;C:\Program Files\Git\cmd;D:\matlab\runtime\win64;D:\matlab\bin;D:\matlab\polyspace\bin;C:\Program Files\Intel\WiFi\bin\;C:\Program Files\Common Files\Intel\WirelessCommon\;C:\Program Files\PuTTY\;D:\Mongodb\bin;C:\Program Files\nodejs\;C:\Program Files (x86)\Yarn\bin\;D:\java\bin;D:\java\jre\bin;C:\Users\66413\AppData\Local\Microsoft\WindowsApps;D:\安装软件\BaiduYunGuanjia\Nmap;D:\安装软件\namp\Nmap;C:\Users\66413\AppData\Roaming\npm;D:\software\visual studio code\Microsoft VS Code\bin;C:\Users\66413\AppData\Local\Yarn\bin
+  /home/lsmaira/npm-global/bin:/home/lsmaira/local/bin:/home/lsmaira/npm-global/bin:/home/lsmaira/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/usr/lib/jvm/java-8-oracle/bin:/usr/lib/jvm/java-8-oracle/db/bin:/usr/lib/jvm/java-8-oracle/jre/bin:/usr/lib/jvm/java-8-oracle/bin:/usr/lib/jvm/java-8-oracle/db/bin:/usr/lib/jvm/java-8-oracle/jre/bin
 
 Yarn version: 
   1.5.1
 
 Node version: 
-  8.9.4
+  9.5.0
 
 Platform: 
-  win32 x64
+  linux x64
 
 npm manifest: 
   {
@@ -32,7 +32,7 @@ npm manifest:
       "test": "jest"
     },
     "devDependencies": {
-      "prettier": "1.11.1"
+      "prettier": "^1.11.1"
     }
   }
 
@@ -2319,7 +2319,7 @@ Lockfile:
     version "0.2.0"
     resolved "https://registry.yarnpkg.com/preserve/-/preserve-0.2.0.tgz#815ed1f6ebc65926f865b310c0713bcb3315ce4b"
   
-  prettier@1.11.1:
+  prettier@^1.11.1:
     version "1.11.1"
     resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.11.1.tgz#61e43fc4cd44e68f2b0dfc2c38cd4bb0fccdcc75"
   
@@ -3126,15 +3126,14 @@ Lockfile:
 Trace: 
   Error: Command failed.
   Exit code: 1
-  Command: C:\WINDOWS\system32\cmd.exe
-  Arguments: /d /s /c "D:\internship work\workflow\workflow\node_modules\.bin\prettier"
-  Directory: D:\internship work\workflow\workflow
+  Command: sh
+  Arguments: -c jest alert_module.test.js
+  Directory: /home/lsmaira/Documents/workspace/mongoose-benchmark/workflow
   Output:
   
-      at ProcessTermError.MessageError (C:\Program Files (x86)\Yarn\lib\cli.js:186:110)
-      at new ProcessTermError (C:\Program Files (x86)\Yarn\lib\cli.js:226:113)
-      at ChildProcess.<anonymous> (C:\Program Files (x86)\Yarn\lib\cli.js:30281:17)
-      at emitTwo (events.js:126:13)
-      at ChildProcess.emit (events.js:214:7)
-      at maybeClose (internal/child_process.js:925:16)
-      at Process.ChildProcess._handle.onexit (internal/child_process.js:209:5)
+      at ProcessTermError.MessageError (/usr/share/yarn/lib/cli.js:186:110)
+      at new ProcessTermError (/usr/share/yarn/lib/cli.js:226:113)
+      at ChildProcess.<anonymous> (/usr/share/yarn/lib/cli.js:30281:17)
+      at ChildProcess.emit (events.js:160:13)
+      at maybeClose (internal/child_process.js:943:16)
+      at Process.ChildProcess._handle.onexit (internal/child_process.js:220:5)

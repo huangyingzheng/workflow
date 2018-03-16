@@ -1,7 +1,7 @@
 /.idea/*
 /node_modules/*
-.app1.js
-.test.js
+app1.js
+test.js
 /SLip_workflow/test.js
 /SLip_workflow/Meme.js
 /SLip_workflow/my_module1.js
