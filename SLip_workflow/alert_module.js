@@ -9,12 +9,6 @@ const User = require("./user");
 const Status_user = require("./status_user");
 const _ = require("lodash");
 
-async function asyncForEach(array, callback) {
-    for (let index = 0; index < array.length; index++) {
-        await callback(array[index], index, array);
-    }
-}
-
 class Alert {
     constructor(date) {
         if (_.isDate(date)) {
@@ -25,81 +19,124 @@ class Alert {
             });
             this.alert = alert;
         } else {
-            return undefined;
-            // throw new Error('invalid input');
+            return new Promise(function(resolve, reject) {
+                reject("invalid object");
+            });
         }
     }
 
-    async initialise() {
+    async initialise(number) {
         try {
             this.alert.log.create_date = this.date;
             this.alert.current_step = 1;
             this.alert.current_order = 0;
+            this.alert.step_number = number;
             const that = this;
-            const step = await Step.find({});
-            const insert = step.some(function(result) {
-                that.alert.step.push(result.comprises);
-            });
-            const save = await that.alert.save();
-            return save;
+            if (this.alert.step_number < 2) {
+                return Promise.reject("Step number necessity more than 2");
+            } else {
+                for (let i = 0; i < number; i++) {
+                    that.alert.step.push([]);
+                }
+                const save = await that.alert
+                    .save()
+                    .catch(err => Promise.reject("can not save"));
+                return that;
+            }
         } catch (err) {
-            return err;
+            return Promise.reject(err);
         }
-    } //initialiser un object
+    }
 
-    async initialise_view(result) {
+    async addController(c_step_number) {
+        try {
+            const that = this;
+            const config = await Config.find({ step: c_step_number })
+                .exec()
+                .catch(err =>
+                    Promise.reject("work_config correspond no found")
+                );
+            config.forEach(function(sub) {
+                that.alert.step[0].push(sub.id);
+                that.alert.markModified("step");
+            });
+            const save = await this.alert.save();
+            return save;
+        } catch (e) {
+            return Promise.reject(e);
+        }
+    }
+
+    async addManager(c_step_number, step_number) {
+        try {
+            const that = this;
+            const config = await Config.find({ step: c_step_number })
+                .exec()
+                .catch(err =>
+                    Promise.reject("work_config correspond no found")
+                );
+            config.forEach(async function(sub) {
+                that.alert.step[step_number].push(sub._id);
+                that.alert.markModified("step");
+            });
+            const save = await this.alert.save();
+            return save;
+        } catch (e) {
+            return Promise.reject(e);
+        }
+    }
+
+    async initialise_view() {
         try {
             const view = Status_user;
-            let i = result.current_step;
-            let j = result.current_order;
-            let config_id = undefined;
-            const current_user = result.step[i][j];
-            const controller = await Step.find({ name: "step_0" })
-                .exec()
-                .then(controller => {
-                    config_id = controller[0].comprises;
-                    config_id.push(current_user);
-                });
+            let i = this.alert.current_step;
+            let j = this.alert.current_order;
+            let config_id = [];
+            const current_user = this.alert.step[i][j];
+            this.alert.step[0].forEach(function(sub) {
+                config_id.push(sub);
+            });
+            config_id.push(current_user);
+            const that = this;
             for (let index = 0; index in config_id; index++) {
                 const config = await Config.findOne({
                     _id: config_id[index]
-                }).exec();
-                if (index === 0) {
-                    view.step = 0;
-                    view.order = 0;
-                    view.active = false;
+                })
+                    .exec()
+                    .catch(err => Promise.reject("no work_config correspond"));
+                if (index === config_id.length - 1) {
+                    view.step = that.alert.current_step;
+                    view.order = that.alert.current_order;
+                    view.active = true;
                 } else {
-                    view.step = result.current_step;
-                    view.order = result.current_order;
-                    if (i === 0) {
-                        view.active = false;
-                    } else {
-                        view.active = true;
-                    }
+                    view.step = 0;
+                    view.active = false;
                 }
                 const habilitation = await Habilitation.findOne({
                     _id: config.hab_id
-                }).exec();
+                })
+                    .exec()
+                    .catch(err => Promise.reject("no habilitation correspond"));
                 const users = habilitation.users_id;
                 users.forEach(async function(user) {
                     let view_instance = new view({
                         _id: new mongoose.Types.ObjectId(),
-                        alert_id: result._id,
+                        alert_id: that.alert._id,
                         step: view.step,
                         order: view.order,
                         user_id: user,
                         active: view.active
                     });
-                    await view_instance.save().then(val => {
-                        console.log(val);
-                    });
+                    view_instance.save().then(val => {
+                        console
+                            .log(val);
+                    }).catch(err => Promise.reject("can not save"));
                 });
             }
         } catch (e) {
-            console.error(e);
-            return e;
+            return Promise.reject(e);
         }
-    } // initialise a status_users
+    }
 
     async findAlert(id) {
         try {
@@ -108,96 +145,93 @@ class Alert {
             }).exec();
             result.log.handle_day = this.date;
             result.markModified("log");
+            this.alert = result;
             const save = await result.save();
-            return save;
+            return this ;
         } catch (err) {
-            return new Promise(function(resolve,reject){
-                reject('id no found');
-            })
-            // return 'id no found';
-            // return undefined;
-            // return new Error('id no found');
+            return new Promise(function(resolve, reject) {
+                reject("id no found");
+            });
         }
-    } //  handle late
+    }
 
-    async view(result) {
-        const operation_id =
-            result.step[result.current_step][result.current_order];
-        const config = await Config.findOne({
-            _id: mongoose.Types.ObjectId(operation_id)
-        }).exec();
-        const habilitation = await Habilitation.findOne({
-            _id: config.hab_id
-        }).exec();
-        const users = [];
-        const user_array = habilitation.users_id;
-        for (let i = 0; i in user_array; i++) {
-            const id = user_array[i];
-            const user = await User.findOne({ _id: id });
-            users.push(user + ", active");
-        }
-        return users;
-    } //montre en quel etape et qui peux operer.
-
-    async nextStep(result) {
+    async nextStep() {
         try {
-            if (result.step === undefined) {
-                // throw new Error('no record')
-                return await new Promise(function(resolve, reject) {
+            const that = this;
+            if (that.alert.step === undefined) {
+                console.log("record not exist");
+                return new Promise(function(resolve, reject) {
                     reject("record not exist");
                 });
-            } else if (result.step.length === 0) {
+            } else if (that.alert.step.length === 0) {
+                console.log("no record");
                 return await new Promise(function(resolve, reject) {
                     reject("no record");
                 });
             } else {
                 if (
-                    result.current_order + 1 <
-                    result.step[result.current_step].length
+                    that.alert.current_order + 1 <
+                    that.alert.step[that.alert.current_step].length
                 ) {
                     await Alert_model.update(
-                        { _id: mongoose.Types.ObjectId(result._id) },
-                        { $set: { current_order: result.current_order + 1 } }
+                        { _id: mongoose.Types.ObjectId(that.alert._id) },
+                        { $set: { current_order: that.alert.current_order + 1 } }
                     ).exec();
-                    return await new Promise(function(resolve, reject) {
+                    console.log( "successful:" +
+                        " current_step " +
+                        that.alert.current_step +
+                        " current_order " +
+                        (that.alert.current_order + 1));
+                    return new Promise(function(resolve, reject) {
                         resolve(
                             "successful:" +
                                 " current_step " +
-                                result.current_step +
+                                that.alert.current_step +
                                 " current_order " +
-                            (result.current_order+1)
+                                (that.alert.current_order + 1)
                         );
                     });
                 } else if (
-                    result.current_order + 1 ===
-                    result.step[result.current_step].length
+                    that.alert.current_order + 1 ===
+                    that.alert.step[that.alert.current_step].length
                 ) {
-                    if (result.current_step + 1 === result.step.length) {
-                        return await new Promise(function(resolve, reject) {
+                    if (that.alert.current_step + 1 === that.alert.step.length) {
+                        console.log("successful:" +
+                            " current_step " +
+                            that.alert.current_step +
+                            " current_order " +
+                            that.alert.current_order +
+                            "\nhere is the end of step");
+                        return new Promise(function(resolve, reject) {
                             resolve(
                                 "successful:" +
                                     " current_step " +
-                                result.current_step +
+                                    that.alert.current_step +
                                     " current_order " +
-                                result.current_order +
+                                    that.alert.current_order +
                                     "\nhere is the end of step"
                             );
                         });
                     } else {
                         await Alert_model.update(
-                            { _id: mongoose.Types.ObjectId(result._id) },
+                            { _id: mongoose.Types.ObjectId(that.alert._id) },
                             {
                                 $set: {
-                                    current_step: result.current_step + 1,
+                                    current_step: that.alert.current_step + 1,
                                     current_order: 0
                                 }
                             }
                         ).exec();
+                        console.log("successful:" +
+                            " current_step " +
+                            (that.alert.current_step + 1) +
+                            " current_order " +
+                            0);
                         return await new Promise(function(resolve, reject) {
                             resolve(
                                 "successful:" +
                                     " current_step " +
-                                (result.current_step+1) +
+                                    (that.alert.current_step + 1) +
                                     " current_order " +
                                     0
                             );
@@ -208,62 +242,77 @@ class Alert {
         } catch (err) {
             return err;
         }
-    } // currentStep +1 if celui qui appeler ce methodes est le derniere etap, retour ok
-
-    async previous(result) {
+    }
+    async previous() {
         try {
-            if (result.step === undefined) {
+            const that = this;
+            if (that.alert.step === undefined) {
                 // throw new Error('no record')
-                return await new Promise(function(resolve, reject) {
+                return  new Promise(function(resolve, reject) {
                     reject("record not exist");
                 });
-            } else if (result.step.length === 0) {
-                return await new Promise(function(resolve, reject) {
+            } else if (that.alert.step.length === 0) {
+                return new Promise(function(resolve, reject) {
                     reject("no record");
                 });
             } else {
-                const order = result.current_order;
-                const step = result.current_step;
+                const order = that.alert.current_order;
+                const step = that.alert.current_step;
                 if (order > 0) {
                     await Alert_model.update(
                         {
-                            _id: mongoose.Types.ObjectId(result._id)
+                            _id: mongoose.Types.ObjectId(that.alert._id)
                         },
-                        { $set: { current_order: result.current_order - 1 } }
+                        { $set: { current_order: that.alert.current_order - 1 } }
                     ).exec();
+                    console.log( "successful:" +
+                        " current_step " +
+                        that.alert.current_step +
+                        " current_order " +
+                        (that.alert.current_order - 1));
                     return await new Promise(function(resolve, reject) {
                         resolve(
                             "successful:" +
                                 " current_step " +
-                                result.current_step +
+                                that.alert.current_step +
                                 " current_order " +
-                            (result.current_order-1)
+                                (that.alert.current_order - 1)
                         );
                     });
                 } else if (order === 0) {
                     if (step <= 1) {
+                        console.log("you have not authority to access");
                         return await new Promise(function(resolve, reject) {
                             reject("you have not authority to access");
                         });
                     } else {
                         await Alert_model.update(
-                            { _id: result._id },
+                            { _id: that.alert._id },
                             {
                                 $set: {
-                                    current_step: result.current_step - 1,
+                                    current_step: that.alert.current_step - 1,
                                     current_order:
-                                        result.step[result.current_step - 1]
+                                        that.alert.step[that.alert.current_step - 1]
                                             .length - 1
                                 }
                             }
                         ).exec();
+                        console.log("successful:" +
+                            " current_step " +
+                            (that.alert.current_step - 1) +
+                            " current_order " +
+                            (that.alert.step[that.alert.current_step - 1]
+                                    .length -
+                                1));
                         return await new Promise(function(resolve, reject) {
                             resolve(
                                 "successful:" +
                                     " current_step " +
-                                (result.current_step-1) +
+                                    (that.alert.current_step - 1) +
                                     " current_order " +
-                                (result.step[result.current_step - 1].length - 1)
+                                    (that.alert.step[that.alert.current_step - 1]
+                                        .length -
+                                        1)
                             );
                         });
                     }
@@ -276,51 +325,18 @@ class Alert {
 }
 module.exports = Alert;
 
-const a = new Alert(new Date());
-const start = async function() {
-    try {
-        // let alert = await a.initialise();
-        let alert = await a.findAlert("5aabbeaaafe36526fd4f6be");
-        // let result = await a.nextStep(alert);
-        // result = await a.nextStep(result);
-        // console.log(alert);
-        // console.log(typeof alert);
-        // assert.ok(alert instanceof Promise);
-        // console.log(alert);
-        // a.initialise_view(alert);
-        // const view = await a.view(alert);
-        // console.log(view);
-        // await a.previous(alert);
-    } catch (err) {
-        console.log(err);
-    }
-};
-start();
-
-// const a2 =async function(){
-//     const a1 = await a.findAlert('5aa694d6d8c9e03206285b35');
-//     console.log(a1);
-// }
-// a2();
-// console.log(1);
-
-// export class Workflow_config{
-//     constructor(name){
-//         this.name = name
+// const start = async function() {
+//     try {
+//         let a = new Alert(new Date());
+//         a = await a.initialise(2);
+//         await a.addController(0);
+//         await a.initialise_view();
+//         await a.findAlert('5ab0e09068f0e2212d53560d');
+//         await a.nextStep();
+//         await a.previous();
+//     } catch (err) {
+//         console.log(err);
 //     }
-//     addHabilitation(id){}
-//     showComprenent{}
-// }
-//
-// manager = new Workflow_config();
-//
-// a = new Alert(date);
-// a = {
-//     _id : mongoose.Types.ObjectId,
-//     log : {
-//         create_date:01,
-//         handle_date_1:02
-//     },
-//     currentStep:2,// max length step,min 0
-//     step:[[manager, department_manager],[director],[administateur]]
-// }
+// };
+// start();
+
