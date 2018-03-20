@@ -19,9 +19,7 @@ class Alert {
             });
             this.alert = alert;
         } else {
-            return new Promise(function(resolve, reject) {
-                reject("invalid object");
-            });
+            return Promise.reject("invalid object");
         }
     }
 
@@ -38,9 +36,7 @@ class Alert {
                 for (let i = 0; i < number; i++) {
                     that.alert.step.push([]);
                 }
-                const save = await that.alert
-                    .save()
-                    .catch(err => Promise.reject("can not save"));
+                const save = await that.alert.save();
                 return that;
             }
         } catch (err) {
@@ -127,12 +123,7 @@ class Alert {
                         user_id: user,
                         active: view.active
                     });
-                    view_instance
-                        .save()
-                        .then(val => {
-                            console.log(val);
-                        })
-                        .catch(err => Promise.reject("can not save"));
+                    view_instance.save();
                 });
             }
         } catch (e) {
@@ -151,9 +142,7 @@ class Alert {
             const save = await result.save();
             return this;
         } catch (err) {
-            return new Promise(function(resolve, reject) {
-                reject("id no found");
-            });
+            return Promise.reject("id no found");
         }
     }
 
@@ -162,14 +151,10 @@ class Alert {
             const that = this;
             if (that.alert.step === undefined) {
                 console.log("record not exist");
-                return new Promise(function(resolve, reject) {
-                    reject("record not exist");
-                });
+                return Promise.reject("record not exist");
             } else if (that.alert.step.length === 0) {
                 console.log("no record");
-                return new Promise(function(resolve, reject) {
-                    reject("no record");
-                });
+                return Promise.reject("no record");
             } else {
                 if (
                     that.alert.current_order + 1 <
@@ -190,15 +175,13 @@ class Alert {
                             " current_order " +
                             (that.alert.current_order + 1)
                     );
-                    return new Promise(function(resolve, reject) {
-                        resolve(
-                            "successful:" +
-                                " current_step " +
-                                that.alert.current_step +
-                                " current_order " +
-                                (that.alert.current_order + 1)
-                        );
-                    });
+                    return Promise.resolve(
+                        "successful:" +
+                            " current_step " +
+                            that.alert.current_step +
+                            " current_order " +
+                            (that.alert.current_order + 1)
+                    );
                 } else if (
                     that.alert.current_order + 1 ===
                     that.alert.step[that.alert.current_step].length
@@ -215,16 +198,14 @@ class Alert {
                                 that.alert.current_order +
                                 "\nhere is the end of step"
                         );
-                        return new Promise(function(resolve, reject) {
-                            resolve(
-                                "successful:" +
-                                    " current_step " +
-                                    that.alert.current_step +
-                                    " current_order " +
-                                    that.alert.current_order +
-                                    "\nhere is the end of step"
-                            );
-                        });
+                        return Promise.resolve(
+                            "successful:" +
+                                " current_step " +
+                                that.alert.current_step +
+                                " current_order " +
+                                that.alert.current_order +
+                                "\nhere is the end of step"
+                        );
                     } else {
                         await Alert_model.update(
                             { _id: mongoose.Types.ObjectId(that.alert._id) },
@@ -242,15 +223,13 @@ class Alert {
                                 " current_order " +
                                 0
                         );
-                        return new Promise(function(resolve, reject) {
-                            resolve(
-                                "successful:" +
-                                    " current_step " +
-                                    (that.alert.current_step + 1) +
-                                    " current_order " +
-                                    0
-                            );
-                        });
+                        return Promise.resolve(
+                            "successful:" +
+                                " current_step " +
+                                (that.alert.current_step + 1) +
+                                " current_order " +
+                                0
+                        );
                     }
                 }
             }
@@ -263,13 +242,9 @@ class Alert {
             const that = this;
             if (that.alert.step === undefined) {
                 // throw new Error('no record')
-                return new Promise(function(resolve, reject) {
-                    reject("record not exist");
-                });
+                return Promise.reject("record not exist");
             } else if (that.alert.step.length === 0) {
-                return new Promise(function(resolve, reject) {
-                    reject("no record");
-                });
+                return Promise.reject("no record");
             } else {
                 const order = that.alert.current_order;
                 const step = that.alert.current_step;
@@ -291,21 +266,19 @@ class Alert {
                             " current_order " +
                             (that.alert.current_order - 1)
                     );
-                    return new Promise(function(resolve, reject) {
-                        resolve(
-                            "successful:" +
-                                " current_step " +
-                                that.alert.current_step +
-                                " current_order " +
-                                (that.alert.current_order - 1)
-                        );
-                    });
+                    return Promise.resolve(
+                        "successful:" +
+                            " current_step " +
+                            that.alert.current_step +
+                            " current_order " +
+                            (that.alert.current_order - 1)
+                    );
                 } else if (order === 0) {
                     if (step <= 1) {
                         console.log("you have not authority to access");
-                        return new Promise(function(resolve, reject) {
-                            reject("you have not authority to access");
-                        });
+                        return Promise.reject(
+                            "you have not authority to access"
+                        );
                     } else {
                         await Alert_model.update(
                             { _id: that.alert._id },
@@ -328,18 +301,15 @@ class Alert {
                                     .length -
                                     1)
                         );
-                        return new Promise(function(resolve, reject) {
-                            resolve(
-                                "successful:" +
-                                    " current_step " +
-                                    (that.alert.current_step - 1) +
-                                    " current_order " +
-                                    (that.alert.step[
-                                        that.alert.current_step - 1
-                                    ].length -
-                                        1)
-                            );
-                        });
+                        return Promise.resolve(
+                            "successful:" +
+                                " current_step " +
+                                (that.alert.current_step - 1) +
+                                " current_order " +
+                                (that.alert.step[that.alert.current_step - 1]
+                                    .length -
+                                    1)
+                        );
                     }
                 }
             }
@@ -353,12 +323,13 @@ module.exports = Alert;
 // const start = async function() {
 //     try {
 //         let a = new Alert(new Date());
-//         a = await a.initialise(2);
-//         await a.addController(0);
-//         await a.initialise_view();
+//         // await a.initialise(2);
+//         // await a.addController(0);
+//         // await a.addManager(1, 1);
+//         // await a.initialise_view();
 //         await a.findAlert('5ab0e09068f0e2212d53560d');
 //         await a.nextStep();
-//         await a.previous();
+//         // await a.previous();
 //     } catch (err) {
 //         console.log(err);
 //     }
