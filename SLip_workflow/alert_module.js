@@ -127,10 +127,12 @@ class Alert {
                         user_id: user,
                         active: view.active
                     });
-                    view_instance.save().then(val => {
-                        console
-                            .log(val);
-                    }).catch(err => Promise.reject("can not save"));
+                    view_instance
+                        .save()
+                        .then(val => {
+                            console.log(val);
+                        })
+                        .catch(err => Promise.reject("can not save"));
                 });
             }
         } catch (e) {
@@ -147,7 +149,7 @@ class Alert {
             result.markModified("log");
             this.alert = result;
             const save = await result.save();
-            return this ;
+            return this;
         } catch (err) {
             return new Promise(function(resolve, reject) {
                 reject("id no found");
@@ -165,7 +167,7 @@ class Alert {
                 });
             } else if (that.alert.step.length === 0) {
                 console.log("no record");
-                return await new Promise(function(resolve, reject) {
+                return new Promise(function(resolve, reject) {
                     reject("no record");
                 });
             } else {
@@ -175,13 +177,19 @@ class Alert {
                 ) {
                     await Alert_model.update(
                         { _id: mongoose.Types.ObjectId(that.alert._id) },
-                        { $set: { current_order: that.alert.current_order + 1 } }
+                        {
+                            $set: {
+                                current_order: that.alert.current_order + 1
+                            }
+                        }
                     ).exec();
-                    console.log( "successful:" +
-                        " current_step " +
-                        that.alert.current_step +
-                        " current_order " +
-                        (that.alert.current_order + 1));
+                    console.log(
+                        "successful:" +
+                            " current_step " +
+                            that.alert.current_step +
+                            " current_order " +
+                            (that.alert.current_order + 1)
+                    );
                     return new Promise(function(resolve, reject) {
                         resolve(
                             "successful:" +
@@ -195,13 +203,18 @@ class Alert {
                     that.alert.current_order + 1 ===
                     that.alert.step[that.alert.current_step].length
                 ) {
-                    if (that.alert.current_step + 1 === that.alert.step.length) {
-                        console.log("successful:" +
-                            " current_step " +
-                            that.alert.current_step +
-                            " current_order " +
-                            that.alert.current_order +
-                            "\nhere is the end of step");
+                    if (
+                        that.alert.current_step + 1 ===
+                        that.alert.step.length
+                    ) {
+                        console.log(
+                            "successful:" +
+                                " current_step " +
+                                that.alert.current_step +
+                                " current_order " +
+                                that.alert.current_order +
+                                "\nhere is the end of step"
+                        );
                         return new Promise(function(resolve, reject) {
                             resolve(
                                 "successful:" +
@@ -222,12 +235,14 @@ class Alert {
                                 }
                             }
                         ).exec();
-                        console.log("successful:" +
-                            " current_step " +
-                            (that.alert.current_step + 1) +
-                            " current_order " +
-                            0);
-                        return await new Promise(function(resolve, reject) {
+                        console.log(
+                            "successful:" +
+                                " current_step " +
+                                (that.alert.current_step + 1) +
+                                " current_order " +
+                                0
+                        );
+                        return new Promise(function(resolve, reject) {
                             resolve(
                                 "successful:" +
                                     " current_step " +
@@ -248,7 +263,7 @@ class Alert {
             const that = this;
             if (that.alert.step === undefined) {
                 // throw new Error('no record')
-                return  new Promise(function(resolve, reject) {
+                return new Promise(function(resolve, reject) {
                     reject("record not exist");
                 });
             } else if (that.alert.step.length === 0) {
@@ -263,14 +278,20 @@ class Alert {
                         {
                             _id: mongoose.Types.ObjectId(that.alert._id)
                         },
-                        { $set: { current_order: that.alert.current_order - 1 } }
+                        {
+                            $set: {
+                                current_order: that.alert.current_order - 1
+                            }
+                        }
                     ).exec();
-                    console.log( "successful:" +
-                        " current_step " +
-                        that.alert.current_step +
-                        " current_order " +
-                        (that.alert.current_order - 1));
-                    return await new Promise(function(resolve, reject) {
+                    console.log(
+                        "successful:" +
+                            " current_step " +
+                            that.alert.current_step +
+                            " current_order " +
+                            (that.alert.current_order - 1)
+                    );
+                    return new Promise(function(resolve, reject) {
                         resolve(
                             "successful:" +
                                 " current_step " +
@@ -282,7 +303,7 @@ class Alert {
                 } else if (order === 0) {
                     if (step <= 1) {
                         console.log("you have not authority to access");
-                        return await new Promise(function(resolve, reject) {
+                        return new Promise(function(resolve, reject) {
                             reject("you have not authority to access");
                         });
                     } else {
@@ -292,26 +313,30 @@ class Alert {
                                 $set: {
                                     current_step: that.alert.current_step - 1,
                                     current_order:
-                                        that.alert.step[that.alert.current_step - 1]
-                                            .length - 1
+                                        that.alert.step[
+                                            that.alert.current_step - 1
+                                        ].length - 1
                                 }
                             }
                         ).exec();
-                        console.log("successful:" +
-                            " current_step " +
-                            (that.alert.current_step - 1) +
-                            " current_order " +
-                            (that.alert.step[that.alert.current_step - 1]
+                        console.log(
+                            "successful:" +
+                                " current_step " +
+                                (that.alert.current_step - 1) +
+                                " current_order " +
+                                (that.alert.step[that.alert.current_step - 1]
                                     .length -
-                                1));
-                        return await new Promise(function(resolve, reject) {
+                                    1)
+                        );
+                        return new Promise(function(resolve, reject) {
                             resolve(
                                 "successful:" +
                                     " current_step " +
                                     (that.alert.current_step - 1) +
                                     " current_order " +
-                                    (that.alert.step[that.alert.current_step - 1]
-                                        .length -
+                                    (that.alert.step[
+                                        that.alert.current_step - 1
+                                    ].length -
                                         1)
                             );
                         });
@@ -339,4 +364,3 @@ module.exports = Alert;
 //     }
 // };
 // start();
-
