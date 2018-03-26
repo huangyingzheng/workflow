@@ -1,5 +1,5 @@
 Arguments: 
-  /usr/local/bin/node /usr/share/yarn/bin/yarn.js test alert_module.test.js
+  /usr/local/bin/node /usr/share/yarn/bin/yarn.js test workflow.test.js
 
 PATH: 
   /home/lsmaira/npm-global/bin:/home/lsmaira/local/bin:/home/lsmaira/npm-global/bin:/home/lsmaira/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/usr/lib/jvm/java-8-oracle/bin:/usr/lib/jvm/java-8-oracle/db/bin:/usr/lib/jvm/java-8-oracle/jre/bin:/usr/lib/jvm/java-8-oracle/bin:/usr/lib/jvm/java-8-oracle/db/bin:/usr/lib/jvm/java-8-oracle/jre/bin
@@ -3127,7 +3127,7 @@ Trace:
   Error: Command failed.
   Exit code: 1
   Command: sh
-  Arguments: -c jest alert_module.test.js
+  Arguments: -c jest workflow.test.js
   Directory: /home/lsmaira/Documents/workspace/mongoose-benchmark/workflow
   Output:
   

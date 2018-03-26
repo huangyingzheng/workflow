@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const testFn = require('./test');
+const testFn = require('./t1.test');
 
 function getName() {
     const firstName = 'Yingzheng';
