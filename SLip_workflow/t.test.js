@@ -7,16 +7,53 @@
 // const Config = require("./workflow_config");
 // const Step = require("./step.js");
 // const assert = require("assert");
-const _ = require('lodash')
-const array = [{a:2,b:5},{a:5},{a:3},{a:2}]
-const array1 =['a','b'];
-for(let index of array){
-    for(let i in index){
-        if(array1.some(a => a === i)){
-            console.log(index[i])
-        }
+// const _ = require('lodash')
+// const array = [{a:2,b:5},{a:5},{a:3},{a:2}]
+// const array1 =['a','b'];
+// for(let index of array){
+//     for(let i in index){
+//         if(array1.some(a => a === i)){
+//             console.log(index[i])
+//         }
+//     }
+// }
+
+
+
+const MongoClient = require("mongodb").MongoClient;
+
+const connectDataBase = async function() {
+    const url = "mongodb://localhost:27017";
+    const mongo = await MongoClient.connect(url);
+    const db = mongo.db("kp3-bis");
+    return { mongo: mongo, db: db };
+};
+async function run(){
+    const Mongo = await connectDataBase();
+    const slpElemDataCollection = Mongo.db.collection("slp.elemData");
+    const slpElements = slpElemDataCollection.find({'hic-date':{ $gt: new Date('2016-01-01'),
+            $lt: new Date('2017-04-23') }})
+    // console.log(slpElements)
+    // console.log(5)
+    while(await slpElements.hasNext()){
+        console.log(slpElements.next())
     }
+    await Mongo.mongo.close();
 }
+run()
+
+//
+// async function count(){
+//     const Mongo = await connectDataBase();
+//     for (let i =0 ; i < 30;i++){
+//         let date = new Date('2018-04-'+ i) ;
+//         const count = await Mongo.db.collection('slp.elemData')
+//             .find({'hic-date':date}).count();
+//         console.log(count + '----------------'+ date );
+//     }
+//     Mongo.mongo.close();
+// }
+// count();
 
 // const result = _.groupBy(array,(item) => {
 //     return Object.keys(item).some(a => {

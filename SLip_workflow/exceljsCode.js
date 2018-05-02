@@ -23,8 +23,8 @@ const inputIdArray = async function(...numbers) {
             header: (await findInTripleCollection(index)).name,
             //'theme-revenue.vente.vente chaussure'
             key: (await findInTripleCollection(index)).name,
-            et: (await findInTripleCollection(index)).code,
-            width: 15
+            code: (await findInTripleCollection(index)).code,
+            width: 25
         });
     }
     return a;
@@ -33,6 +33,7 @@ const inputIdArray = async function(...numbers) {
 const filterDateByStream = function(objectDate, date1, date2) {
     const startDate = new Date(date1);
     const endDate = new Date(date2);
+    console.log(1);
     return objectDate > startDate && objectDate < endDate;
 };
 
@@ -87,7 +88,7 @@ async function findInTripleCollection(id) {
         themeConfigName,
         subThemeName,
         subThemeElementName
-    ]).join(".");
+    ]).join("----->");
     const code = [];
     code.push(themeConfigCode, subThemeCode, subThemeElementCode, "Mt");
     // console.log(_.compact(code));
@@ -137,17 +138,11 @@ async function run() {
     // const test = await slpElemDataCollection.findOne();
     // const revenueBis = [`theme-revenue`,'revenue.Bis','Ticket T1']
     // console.log(_.get(test,revenueBis));
-    const slpElements = await slpElemDataCollection.find().toArray();
+    // const slpElements = await slpElemDataCollection.find().toArray();
+    const slpElements = await slpElemDataCollection.find({'hic-date':{ $gt: new Date('2018-04-21'),
+            $lt: new Date('2018-04-24') }}).toArray();
     const newElements = slpElements.reduce((acc, slpElement) => {
-        if (
-            filterDateByStream(
-                slpElement["hic-date"],
-                "2016-01-19",
-                "2018-04-19"
-            )
-        ) {
             acc.push(slpElement);
-        }
         return acc;
     }, []);
     const shopInfos = await shopInfoConcrete(newElements);
@@ -177,15 +172,15 @@ async function run() {
     }, []);
 
     columns.push(
-        { header: "date", key: "hic-date", width: 15 },
-        { header: "magasin", key: "shopName", width: 15 },
-        { header: "caissier", key: "hic-cashier", width: 15 }
+        { header: "date", key: "hic-date", width: 14 },
+        { header: "magasin", key: "shopName", width: 18 },
+        { header: "caissier", key: "hic-cashier", width: 18 }
     );
 
     const ids = await inputIdArray(
-        "59087905cfdcb1101f851a7a",
-        "58ef2f945916fc0341328629",
-        "59087905cfdcb1101f851a79"
+        '5890a67a0249e55f4ba02753',
+        '59520ece7471444c9ef2951c',
+        '593fc0d8733a9a1be6f62a8d',
     );
     const idsNameArray = ids.reduce((acc, curr) => {
         acc.push(curr.header);
@@ -194,37 +189,60 @@ async function run() {
 
     columns.push(ids);
 
-    function merge(obj) {
-        return _.map(obj, (value, key) => {
-            if (!_.isArray(value)) {
-                return merge(value);
-            } else {
-                const valueFix = Object.assign({}, value[0]);
-                for (let index of idsNameArray) {
-                    valueFix[index] = 0;
-                }
-                const a = value.reduce((acc, curr) => {
-                    // curr是一个记录
-                    for (let i in curr) {
-                        //i是key
-                        if (idsNameArray.some(item => item === i)) {
-                            // console.log(i + '--->'+ acc[i])
-                            if (!curr[i]) {
-                                acc[i] = acc[i] + 0;
-                            } else {
-                                acc[i] = acc[i] + curr[i];
-                            }
+    //对同一行的数据进行合并
+    // function merge(obj) {
+    //     return _.map(obj, (value) => {
+    //         if (!_.isArray(value)) {
+    //             return merge(value);
+    //         } else {
+    //             const valueFix = Object.assign({}, value[0]);
+    //             for (let index of idsNameArray) {
+    //                 valueFix[index] = 0;
+    //             }
+    //             const a = value.reduce((acc, curr) => {
+    //                 // curr是一个记录
+    //                 for (let i in curr) {
+    //                     //i是key
+    //                     if (idsNameArray.some(item => item === i)) {
+    //                         // console.log(i + '--->'+ acc[i])
+    //                         if (!curr[i]) {
+    //                             acc[i] = acc[i] + 0;
+    //                         } else {
+    //                             acc[i] = acc[i] + curr[i];
+    //                         }
+    //                     }
+    //                 }
+    //                 return acc;
+    //             }, valueFix);
+    //             return a;
+    //         }
+    //     });
+    // }
+    function merge(objs){
+        return _.map(objs, obj => {
+            const valueFix = Object.assign({}, obj[0]);
+            for (let key of idsNameArray) {
+                valueFix[key] = 0;
+            }
+            return obj.reduce((acc,curr) => {
+                for(let key in curr){
+                    if(idsNameArray.some(item => item === key)){
+                        if (!curr[key]) {
+                            acc[key] = acc[key] + 0;
+                        } else {
+                            acc[key] = acc[key] + curr[key];
                         }
                     }
-                    return acc;
-                }, valueFix);
-                return a;
-            }
-        });
+                }
+                return acc;
+            },valueFix)
+        })
     }
+    //整合columns
     worksheet.columns = _.flattenDeep(columns);
 
     const newElementsChange = newElements.map(newElement => {
+        //找到目标数据
         const targetArray = shopInfos.filter(shopInfo => {
             return shopInfo.id === newElement.shop.oid.toString();
         });
@@ -236,6 +254,7 @@ async function run() {
         // return newElement
         // console.log(targetArray)
 
+        //将目标数据整合到输出数据上
         const newElement2 = targetArray.reduce(
             (acc, curr) => {
                 acc[curr.organizationAxis] = curr.organization;
@@ -244,41 +263,47 @@ async function run() {
             { ...newElement }
         );
 
+        //加入新的属性，名字叫shopName
         newElement2.shopName = targetArray[0].shopName;
 
+        //加入indicateur 属性下的数据，code是用来搜索的，name是key
         const newElement3 = ids.reduce((acc, curr) => {
-            acc[curr.header] = _.get(acc, curr.et);
+            acc[curr.header] = _.get(acc, curr.code);
             return acc;
         }, newElement2);
 
         return newElement3;
     });
 
-    const array = _.groupBy(newElementsChange, newElement => {
-        return newElement["hic-date"];
+    //将原本要输出的数据进行分类，三重子类
+    const object = _.groupBy(newElementsChange, newElement => {
+        return newElement["hic-date"] + '-'+newElement["shopName"] + '-' + newElement["hic-cashier"];
     });
 
-    for (let index in array) {
-        array[index] = _.groupBy(array[index], item => {
-            return item["shopName"];
-        });
-        for (let i in array[index]) {
-            array[index][i] = _.groupBy(array[index][i], it => {
-                return it["hic-cashier"];
-            });
-        }
-    }
+    // for (let key in object) {
+    //     object[key] = _.groupBy(object[key], item => {
+    //         return item["shopName"] + '-' + item["hic-cashier"];
+    //     });
+        // for (let i in object[key]) {
+        //     object[key][i] = _.groupBy(object[key][i], it => {
+        //         return it["hic-cashier"];
+        //     });
+        // }
+    // }
+    // console.log(object);
 
-    merge(array);
+    //将每一子类的数据进行整个，得到合并数据
+    const a = _.flattenDeep(merge(object));
 
-    const a = _.flattenDeep(merge(array));
-    newElementsChange.forEach(newElement => {
-        worksheet.addRow(newElement);
-    });
-    // console.log(newElementsChange[0])
-    // a.forEach(newElement => {
+    // newElementsChange.forEach(newElement => {
     //     worksheet.addRow(newElement);
     // });
+    // console.log(newElementsChange[0])
+
+    //将新的数据插入表格
+    a.forEach(newElement => {
+        worksheet.addRow(newElement);
+    });
 
     const filename = "test.xlsx";
 
