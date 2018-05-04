@@ -18,7 +18,7 @@ const inputIdArray = async function(...id){
             header: (await findInTripleCollection(index)).name,
             //'theme-revenue.vente.vente chaussure'
             key: (await findInTripleCollection(index)).name,
-            code: (await findInTripleCollection(index)).code,
+            code: (await findInTripleCollection(index)).key,
             width: 25
         })
     }
@@ -78,13 +78,20 @@ async function findInTripleCollection(id) {
         subThemeName,
         subThemeElementName
     ]).join("-");
+    const key = _.compact([
+        themeConfigCode,
+        subThemeCode,
+        subThemeElementCode,
+        "Mt"
+    ]).join(".");
     const code = [];
     code.push(themeConfigCode, subThemeCode, subThemeElementCode, "Mt");
 
     await Mongo.mongo.close();
     return {
         name: name,
-        code: _.compact(code)
+        code: _.compact(code),
+        key:key
     };
 }
 
@@ -98,8 +105,9 @@ const allOrganizationAxis = async function(){
         object = await cursor.next()
         organizationAix.push({
             header:object.name,
-            key:object.name,
+            key:object.code,
             id:object._id,
+            width:18
         })
     }
     await MongoClient.mongo.close();
@@ -113,33 +121,104 @@ async function run(){
     //configure columns
     const columns = [];
 
-    columns.push(...await allOrganizationAxis(),
-        ...await inputIdArray('5890a67a0249e55f4ba02753',
-            '59520ece7471444c9ef2951c',
-            '593fc0d8733a9a1be6f62a8d',
-            '595125517471444c9ef2930b'));
+    const indicateur = await inputIdArray('5890a67a0249e55f4ba02753',
+        '59520ece7471444c9ef2951c',
+        '593fc0d8733a9a1be6f62a8d',
+        '595125517471444c9ef2930b');
 
-    //create a cursor for operation following
-    const slpElementsCursor = await MongoClient.db.collection('slp.elemData')
-        .find({'hic-date':{ $gt: new Date('2018-04-22'),
-            $lt: new Date('2018-04-24') }})
+
+    // console.log(indicateur);
+
+
+    columns.push(...await allOrganizationAxis(),
+        ...indicateur);
+
+    // console.log(await allOrganizationAxis());
+
+    columns.push({ header: "date", key: "date", width: 14 },
+        { header: "magasin", key: "shop", width: 28 },
+        { header: "cashier", key: 'cashier', width: 18 })
+
+    // console.log(await allOrganizationAxis());
+
+
+    const groupForm = { _id :
+            // {"date":"$hic-date"}
+            {'shop':"$hic-shop","cashier":"$hic-cashier","date":"$hic-date"
+            ,"FILIALE":"$FILIALE","CLUSTER":"$CLUSTER","GS":"$GS","REGION":"$REGION","ZONE":"$ZONE","RESEAU":"$RESEAU"}
+    }
+
+    const formWithIndicator = indicateur.reduce((object,item) => {
+        // console.log(object);
+        return {...object,[item.key.toString()]:{ $sum : '$'+item.code.toString() }}
+    },groupForm)
+
+    const groupByIndicator = {$group : formWithIndicator};
+
+    // const groupByIndicator1 = { $group : { _id : {'shop':"$shop","cashier":"$hic-cashier","date":"$hic-date"},"ab": { $sum: "$"+indicateur[0].key.toString()} }}
+    // // console.log(groupByIndicator,groupByIndicator1);
+
+    // create a cursor for operation following
+    const slpElementsCursor = MongoClient.db.collection('slp.elemData').aggregate([
+        {$match:{'hic-date':{ $gt: new Date('2018-04-15'),
+                    $lt: new Date('2018-04-17') }}},
+        groupByIndicator,
+        ],{allowDiskUse:true})
+
+    // const slpElementsCursor = await MongoClient.db.collection('slp.elemData')
+    //     .find({'hic-date':{ $gt: new Date('2018-04-15'),
+    //         $lt: new Date('2018-04-17') }})
 
     // get object, then do a set of implement.
-    let object;
-    while(await slpElementsCursor.hasNext()){
-        object = slpElementsCursor.next();
-        // console.log(object);
-    }
+
 
 
     //configure workbook;
-    const workbook = new Excel.Workbook();
+    const options = {
+        filename: 'des_enregistrements_après_regrouper.xlsx',
+        useStyles: true,
+        useSharedStrings: true
+    }
+    const workbook = new Excel.stream.xlsx.WorkbookWriter(options);
     workbook.creator = "yingzheng";
     workbook.created = new Date();
     workbook.addWorksheet("my sheet");
     const worksheet = workbook.getWorksheet("my sheet");
     worksheet.columns =  columns;
-    // worksheet.addRow(object).commit();
+    let object;
+    let i = 0
+    while(await slpElementsCursor.hasNext()){
+        object = await slpElementsCursor.next();
+        object = Object.keys(object._id).reduce((acc,curr) => {
+            return{...acc,[curr]:acc._id[curr]}
+        },object)
+        const name  = await MongoClient.db.collection('s.organization').findOne({code: object.FILIALE.toString()});
+        object.FILIALE = name.name;
+        const region = await MongoClient.db.collection('s.organization').findOne({code: object.REGION.toString()});
+        object.REGION = region.name;
+        const zone = await MongoClient.db.collection('s.organization').findOne({code: object.ZONE.toString()});
+        object.ZONE = zone.name;
+        const shop = await MongoClient.db.collection('s.shop').findOne({code:object.shop.toString()});
+        object.shop = `${shop.code}-${shop.name}`;
+        // console.log(Object.keys(object._id));
+        // console.log(object);
+        // console.log(object._id.shop)
+        // const object2 = await MongoClient.db.collection('slp.elemData').findOne({"hic-date":object._id.date,"hic-shop":object._id.shop})
+        // object = {...object,...object2}
+        // // object = {}
+        console.log(i++)
+        // const shopInstance = await MongoClient.db.collection('s.shop').findOne({_id:object.shop.oid});
+        // object['shopName']= shopInstance['name'];
+        // console.log(object);
+        worksheet.addRow(object).commit();
+    }
+    workbook.commit()
+        .then(function() {
+            console.log('the stream has been written')
+        })
+        .catch((err)=>{
+            console.log(err);
+        });
 
 
 
@@ -148,16 +227,16 @@ async function run(){
     //add row
 
 
-    const filename = "test2.xlsx";
-
-    const fpath = __dirname + "/" + filename;
-
-    workbook.xlsx
-        .writeFile(fpath)
-        .then(() => console.log("ok"))
-        .catch(e => {
-            console.log(e);
-        });
+    // const filename = "test2.xlsx";
+    //
+    // const fpath = __dirname + "/" + filename;
+    //
+    // workbook.xlsx
+    //     .writeFile(fpath)
+    //     .then(() => console.log("ok"))
+    //     .catch(e => {
+    //         console.log(e);
+    //     });
 
     await MongoClient.mongo.close();
 

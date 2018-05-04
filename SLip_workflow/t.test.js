@@ -25,35 +25,35 @@ const MongoClient = require("mongodb").MongoClient;
 const connectDataBase = async function() {
     const url = "mongodb://localhost:27017";
     const mongo = await MongoClient.connect(url);
-    const db = mongo.db("kp3-bis");
+    const db = mongo.db("kp3");
     return { mongo: mongo, db: db };
 };
-async function run(){
-    const Mongo = await connectDataBase();
-    const slpElemDataCollection = Mongo.db.collection("slp.elemData");
-    const slpElements = slpElemDataCollection.find({'hic-date':{ $gt: new Date('2016-01-01'),
-            $lt: new Date('2017-04-23') }})
-    // console.log(slpElements)
-    // console.log(5)
-    while(await slpElements.hasNext()){
-        console.log(slpElements.next())
-    }
-    await Mongo.mongo.close();
-}
-run()
+// async function run(){
+//     const Mongo = await connectDataBase();
+//     const slpElemDataCollection = Mongo.db.collection("slp.elemData");
+//     const slpElements = slpElemDataCollection.find({'hic-date':{ $gt: new Date('2016-01-01'),
+//             $lt: new Date('2017-04-23') }})
+//     // console.log(slpElements)
+//     // console.log(5)
+//     while(await slpElements.hasNext()){
+//         console.log(slpElements.next())
+//     }
+//     await Mongo.mongo.close();
+// }
+// run()
 
 //
-// async function count(){
-//     const Mongo = await connectDataBase();
-//     for (let i =0 ; i < 30;i++){
-//         let date = new Date('2018-04-'+ i) ;
-//         const count = await Mongo.db.collection('slp.elemData')
-//             .find({'hic-date':date}).count();
-//         console.log(count + '----------------'+ date );
-//     }
-//     Mongo.mongo.close();
-// }
-// count();
+async function count(){
+    const Mongo = await connectDataBase();
+    for (let i =0 ; i < 30;i++){
+        let date = new Date('2018-04-'+ i) ;
+        const count = await Mongo.db.collection('slp.elemData')
+            .find({'hic-date':date}).count();
+        console.log(count + '----------------'+ date );
+    }
+    Mongo.mongo.close();
+}
+count();
 
 // const result = _.groupBy(array,(item) => {
 //     return Object.keys(item).some(a => {
