@@ -139,10 +139,16 @@ async function run() {
     // const revenueBis = [`theme-revenue`,'revenue.Bis','Ticket T1']
     // console.log(_.get(test,revenueBis));
     // const slpElements = await slpElemDataCollection.find().toArray();
-    const slpElements = await slpElemDataCollection.find({'hic-date':{ $gt: new Date('2018-04-21'),
-            $lt: new Date('2018-04-24') }}).toArray();
+    const slpElements = await slpElemDataCollection
+        .find({
+            "hic-date": {
+                $gt: new Date("2018-04-21"),
+                $lt: new Date("2018-04-24")
+            }
+        })
+        .toArray();
     const newElements = slpElements.reduce((acc, slpElement) => {
-            acc.push(slpElement);
+        acc.push(slpElement);
         return acc;
     }, []);
     const shopInfos = await shopInfoConcrete(newElements);
@@ -178,9 +184,9 @@ async function run() {
     );
 
     const ids = await inputIdArray(
-        '5890a67a0249e55f4ba02753',
-        '59520ece7471444c9ef2951c',
-        '593fc0d8733a9a1be6f62a8d',
+        "5890a67a0249e55f4ba02753",
+        "59520ece7471444c9ef2951c",
+        "593fc0d8733a9a1be6f62a8d"
     );
     const idsNameArray = ids.reduce((acc, curr) => {
         acc.push(curr.header);
@@ -218,15 +224,15 @@ async function run() {
     //         }
     //     });
     // }
-    function merge(objs){
+    function merge(objs) {
         return _.map(objs, obj => {
             const valueFix = Object.assign({}, obj[0]);
             for (let key of idsNameArray) {
                 valueFix[key] = 0;
             }
-            return obj.reduce((acc,curr) => {
-                for(let key in curr){
-                    if(idsNameArray.some(item => item === key)){
+            return obj.reduce((acc, curr) => {
+                for (let key in curr) {
+                    if (idsNameArray.some(item => item === key)) {
                         if (!curr[key]) {
                             acc[key] = acc[key] + 0;
                         } else {
@@ -235,8 +241,8 @@ async function run() {
                     }
                 }
                 return acc;
-            },valueFix)
-        })
+            }, valueFix);
+        });
     }
     //整合columns
     worksheet.columns = _.flattenDeep(columns);
@@ -277,18 +283,24 @@ async function run() {
 
     //将原本要输出的数据进行分类，三重子类
     const object = _.groupBy(newElementsChange, newElement => {
-        return newElement["hic-date"] + '-'+newElement["shopName"] + '-' + newElement["hic-cashier"];
+        return (
+            newElement["hic-date"] +
+            "-" +
+            newElement["shopName"] +
+            "-" +
+            newElement["hic-cashier"]
+        );
     });
 
     // for (let key in object) {
     //     object[key] = _.groupBy(object[key], item => {
     //         return item["shopName"] + '-' + item["hic-cashier"];
     //     });
-        // for (let i in object[key]) {
-        //     object[key][i] = _.groupBy(object[key][i], it => {
-        //         return it["hic-cashier"];
-        //     });
-        // }
+    // for (let i in object[key]) {
+    //     object[key][i] = _.groupBy(object[key][i], it => {
+    //         return it["hic-cashier"];
+    //     });
+    // }
     // }
     // console.log(object);
 

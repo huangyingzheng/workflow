@@ -17,8 +17,7 @@
 //         }
 //     }
 // }
-
-
+const assert = require('assert');
 
 const MongoClient = require("mongodb").MongoClient;
 
@@ -43,17 +42,34 @@ const connectDataBase = async function() {
 // run()
 
 //
+const _ = require("lodash")
 async function count(){
     const Mongo = await connectDataBase();
-    for (let i =0 ; i < 30;i++){
-        let date = new Date('2018-04-'+ i) ;
-        const count = await Mongo.db.collection('slp.elemData')
-            .find({'hic-date':date}).count();
-        console.log(count + '----------------'+ date );
+    const months = ['01','02','03','04','05','06','07','08','09','10','11','12'];
+    let total = 0;
+    for (let month of months){
+        for (let i =1 ; i < 32;i++){
+            let dateStart = new Date('2018'+'-'+ month +'-'+ i+'T00:00:00Z');
+            let dateEnd = new Date('2018'+'-'+ month +'-'+ i+'T23:59:59Z');
+            console.log(dateStart,dateEnd)
+            // console.log(month)
+            //
+            // const count = await Mongo.db.collection('slp.elemData').find({'hic-date':{'$gte': new Date('2018'+'-'+ month +'-'+ i+'T00:00:00')
+            //         , '$lte': new Date('2018'+'-'+ month +'-'+ i+'T23:59:59')}}).count();
+            // console.log(count);
+            // if(count !== 0 ){
+            //     console.log(count + '--------->'+ dateStart );
+            //     total = total+count;
+            //     console.log(total);
+            // }
+            //
+            // // console.log(count + '----------------'+ date );
+        }
     }
+    // console.log(total);
     Mongo.mongo.close();
 }
-count();
+// count();
 
 // const result = _.groupBy(array,(item) => {
 //     return Object.keys(item).some(a => {
@@ -83,6 +99,65 @@ count();
 // }
 //
 // merge(a);
+const organizations = {"123456":5,"234":6,"456":7}
+//
+const organizationObject = ["234","456"];
+const a = _.filter(organizations,obj =>{
+    // console.log(Object.keys(obj))
+    for(let i of organizationObject ){
+        if(Object.keys(obj)=== i){
+            return true;
+        }
+    }
+})
+console.log(a)
+
+
+// async function tabOrganizationAxis(){
+//     const MongoClient = await connectDataBase();
+//     const arrayEmpty = {};
+//     const cursor = MongoClient.db.collection("s.organization").find();
+//     while (await cursor.hasNext()){
+//         const object = await cursor.next();
+//         arrayEmpty[object._id] = object.name;
+//     }
+//     await MongoClient.mongo.close();
+//     console.log(arrayEmpty);
+//     // return arrayEmpty
+// }
+// tabOrganizationAxis()
+// async function tabOrganizationAxis(){
+//     const MongoClient = await connectDataBase();
+//     const objectEmpty = {};
+//     const cursor = MongoClient.db.collection("s.organizationAxis").find();
+//     while (await cursor.hasNext()){
+//         const object = await cursor.next();
+//         objectEmpty[object._id] = object.name;
+//     }
+//     await MongoClient.mongo.close();
+//     console.log(objectEmpty);
+//     // return objectEmpty
+// }
+// tabOrganizationAxis();
+// const a =[ { id: '5ab13058e0e69be232c1f06b', name: 'FILIALE' },
+//     { id: '5ab13058e0e69be232c1f06e', name: 'CLUSTER' }]
+//
+// const b = a.reduce((acc,key)=>{
+//     acc ={...acc,[key.id]:key.name}
+//     return acc;
+// },{})
+// console.log(b);
+
+
+// try {
+//     //
+// } catch (err) {
+//     if(err.code === 'ERR_HTTP2_SESSION_ERROR'){
+//         //do something
+//     } else{
+//         // do something
+//     }
+// }
 
 // const async = require('async');
 // const a = function (callback){
